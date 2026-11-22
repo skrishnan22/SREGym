@@ -26,4 +26,15 @@ All three answered with a correct fenced bash block.
 
 `.env` on the VM now has `AGENT_API_BASE` and `JUDGE_API_BASE` set to `http://127.0.0.1:8788`. SREGym rewrites loopback hosts to `host.docker.internal` for agent containers. The previous direct-to-Go `.env` is kept at `~/go-direct.env` (outside the repo).
 
-**Open:** in `filtered` mode the agent's allow-list is derived from `--model`, so agent runs through the proxy probably need `--allow-agent-endpoint http://host.docker.internal:8788`. To confirm with `--check-setup`.
+## 2026-11-22: `--check-setup` passes
+
+SREGym does not load `.env` itself; every command runs after `set -a; . ./.env; set +a`.
+
+```bash
+uv run main.py --agent mini-sre --model openai/glm-5.3-flash --judge-model openai/gpt-6-luna \
+  --problem network_policy_block --check-setup
+```
+
+First pass: 15 pass, 1 warning, 2 skipped, all because the agent image was not pulled. After `docker pull` of the pinned `ghcr.io/sregym/agent-base:sha-a4c6bf3…` image (1.79 GB), all 18 checks pass, including "Container to host", "Temp folder mounts" and the judge answering through the proxy.
+
+The filtered-network allow-list is derived from `AGENT_API_BASE` (it reports "agent may reach: 127.0.0.1"), so `--allow-agent-endpoint` does not appear to be needed for the proxy. The first real run confirms it.
