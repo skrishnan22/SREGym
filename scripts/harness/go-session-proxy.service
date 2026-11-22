@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenCode Go session-header proxy for SREGym (see go-session-proxy.ts)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/SREGym
+ExecStart=/usr/bin/node scripts/harness/go-session-proxy.ts
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
