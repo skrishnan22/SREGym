@@ -38,3 +38,27 @@ uv run main.py --agent mini-sre --model openai/glm-5.3-flash --judge-model opena
 First pass: 15 pass, 1 warning, 2 skipped, all because the agent image was not pulled. After `docker pull` of the pinned `ghcr.io/sregym/agent-base:sha-a4c6bf3…` image (1.79 GB), all 18 checks pass, including "Container to host", "Temp folder mounts" and the judge answering through the proxy.
 
 The filtered-network allow-list is derived from `AGENT_API_BASE` (it reports "agent may reach: 127.0.0.1"), so `--allow-agent-endpoint` does not appear to be needed for the proxy. The first real run confirms it.
+
+## 2026-11-22: first `autosubmit` run, `network_policy_block`
+
+```bash
+uv run main.py --agent autosubmit --model openai/glm-5.3-flash --judge-model openai/gpt-6-luna \
+  --problem network_policy_block
+```
+
+Results in `results/1122_1403/` on the VM. `run_status` complete, no timeout, no deploy failure, 0 blocked requests. Wall time 474 s.
+
+| Phase | Seconds |
+|---|---|
+| deploy | 272 |
+| undeploy leftovers, fix_kubernetes, inject | 8 |
+| stage: diagnosis | 6 |
+| stage: mitigation | 55 |
+| evaluate diagnosis + mitigation | 13 |
+| cleanup | 102 |
+
+**Fixed overhead per run is about 6.5 minutes** (deploy plus cleanup), before any agent time. This was the first deploy on a fresh VM, so it includes image pulls; later deploys may be faster. Per-run time is roughly 6.5 min + agent time.
+
+**Grading behaved as expected.** Diagnosis failed. Mitigation failed with `fault_still_present`, class `agent_error`, so this problem's oracle does not pass an untouched cluster.
+
+**The judge's floor is 0.33, not 0.** The answer "yes" scored 0.33 in each of the three dimensions (one of three checklist questions answered yes in each). If the continuous composite score is used as a metric, 0.33 is "said nothing useful", and the pass mark is 0.70.
