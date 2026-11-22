@@ -6,6 +6,7 @@ Build a minimal agent harness from scratch, score it on SREGym with cheap models
 
 | # | Document | What it is for |
 |---|---|---|
+| 0 | [Handoff](HANDOFF.md) | Where the exercise stands and how to resume. Read first in a new session |
 | 1 | [Learning guide](learning/README.md) | Three chapters to get up to speed before designing anything |
 | 2 | [Execution plan](execution-plan.md) | The phases from today to a final scored harness, with owners, gates, budget and risks |
 | 3 | [Improvements catalog](improvements-catalog.md) | About 95 harness changes grouped by what they touch, each tied to the failure it targets and the metric it moves |
